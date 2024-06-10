@@ -16,11 +16,11 @@ Converts .miframes (from a mineimator animation) to .animation.json (for blockbl
 I do not use either of these programs (in fact I dont even have them installed). I developed this script for a friend who needed to use Mineimator's animation tools for a blockbench project.
 
 This means the script is mostly built around the features that were required for his project to work. With that being said, known limitations are listed below:
-- Root bones are not saved to json in mineimator, so you have to type out the root bone for each animation you convert in the cmd line (it will prompt you).
+- Interpolation types (smooth, instant, etc) are not supported (blockbench's json output changes significantly if any interpolation mode is used outside of linear, and it would require extreme changes to my code to get working)
 - Affected bones / ignored bones (from the Animated Java plugin in blockbench) are not supported (most plugins that add something to the frames json in blockbench will not work[^1])
-- Scale is not supported (will be soon)
 - Bend is not supported (blockbench does not have bend)
-- You might have to rename the bones again in blockbench because mineimator's renaming is kind of broken (it doesn't apply to the .miframes)
+- You might have to rename the bones again in blockbench because mineimator's renaming is kind of broken (it doesn't correctly apply to the .miframes output)
+- Maximum json filesize is 1mb (hard-coded), you will never exceed this (you can increase the limit yourself if you somehow do)
 
 ## Build
 ```zig
