@@ -13,7 +13,7 @@ Converts .miframes (from a mineimator animation) to .animation.json (for blockbl
 - Made by me :)
 
 ### Limitations:
-I do not use either of these programs (in fact I dont even have them installed). I developed this script for a friend who needed to use Mineimator's animation tools for a blockbench project.
+I do not use either of these programs (in fact I dont even have them installed). I developed this script for a friend who needed to use Mineimator's animation tools for a Blockbench (more specifically Animated Java) project.
 
 This means the script is mostly built around the features that were required for his project to work. With that being said, known limitations are listed below:
 - Interpolation types (smooth, instant, etc) are not supported (blockbench's json output changes significantly if any interpolation mode is used outside of linear, and it would require extreme changes to my code to get working)
