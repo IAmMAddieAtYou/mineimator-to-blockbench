@@ -1,0 +1,7 @@
+/zig-cache/
+/zig-out/
+*.json
+*.txt
+*.exe
+*.exe.obj
+*.pdb
