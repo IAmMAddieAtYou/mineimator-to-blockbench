@@ -8,13 +8,13 @@ pub fn convert(allocator: std.mem.Allocator, text: []const u8, file_name: []cons
     const bone_data = struct {
         position: ?std.json.ArrayHashMap([3]f64),
         rotation: ?std.json.ArrayHashMap([3]f64),
+        scale: ?std.json.ArrayHashMap([3]f64),
     };
 
     var bones = std.StringArrayHashMapUnmanaged(bone_data){};
 
     // parse json
-    var parsed = try std.json.parseFromSlice(std.json.Value, allocator, text, .{});
-    defer parsed.deinit();
+    const parsed = try std.json.parseFromSlice(std.json.Value, allocator, text, .{});
 
     var root = parsed.value;
     tempo = @intCast(root.object.get("tempo").?.integer);
@@ -26,7 +26,6 @@ pub fn convert(allocator: std.mem.Allocator, text: []const u8, file_name: []cons
 
     const stdin = std.io.getStdIn();
     const input = try stdin.reader().readUntilDelimiterOrEofAlloc(allocator, '\n', 1024) orelse return error.NoInput;
-    defer allocator.free(input);
 
     for (root.object.get("keyframes").?.array.items) |keyframe| {
         const position: u64 = @intCast(keyframe.object.get("position").?.integer);
@@ -46,6 +45,10 @@ pub fn convert(allocator: std.mem.Allocator, text: []const u8, file_name: []cons
         var X_ROT: f64 = undefined;
         var Y_ROT: f64 = undefined;
         var Z_ROT: f64 = undefined;
+
+        var X_SCALE: f64 = undefined;
+        var Y_SCALE: f64 = undefined;
+        var Z_SCALE: f64 = undefined;
 
         const values = keyframe.object.get("values").?.object;
 
@@ -121,6 +124,42 @@ pub fn convert(allocator: std.mem.Allocator, text: []const u8, file_name: []cons
             Z_ROT = 0;
         }
 
+        if (values.get("SCALE_X") != null) {
+            switch (values.get("SCALE_X").?) {
+                .integer => |i| X_SCALE = @floatFromInt(i),
+                .float => |f| X_SCALE = f,
+                else => {
+                    std.debug.print("invalid SCALE_X", .{});
+                },
+            }
+        } else {
+            X_SCALE = 1;
+        }
+
+        if (values.get("SCALE_Y") != null) {
+            switch (values.get("SCALE_Y").?) {
+                .integer => |i| Y_SCALE = @floatFromInt(i),
+                .float => |f| Y_SCALE = f,
+                else => {
+                    std.debug.print("invalid SCALE_Y", .{});
+                },
+            }
+        } else {
+            Y_SCALE = 1;
+        }
+
+        if (values.get("SCALE_Z") != null) {
+            switch (values.get("SCALE_Z").?) {
+                .integer => |i| Z_SCALE = @floatFromInt(i),
+                .float => |f| Z_SCALE = f,
+                else => {
+                    std.debug.print("invalid SCALE_Z", .{});
+                },
+            }
+        } else {
+            Z_SCALE = 1;
+        }
+
         const pos_data: [3]f64 = .{
             X_POS,
             Z_POS,
@@ -133,23 +172,33 @@ pub fn convert(allocator: std.mem.Allocator, text: []const u8, file_name: []cons
             -Y_ROT,
         };
 
+        const scale_data: [3]f64 = .{
+            X_SCALE,
+            Y_SCALE,
+            Z_SCALE,
+        };
+
         const frame_pos_string = try std.fmt.allocPrint(allocator, "{d}", .{@as(f64, @floatFromInt(position))/@as(f64, @floatFromInt(tempo))});
 
         var pos_map = std.StringArrayHashMapUnmanaged([3]f64){};
         var rot_map = std.StringArrayHashMapUnmanaged([3]f64){};
+        var scale_map = std.StringArrayHashMapUnmanaged([3]f64){};
 
         if (!bones.contains(bone_name)) {
             try pos_map.putNoClobber(allocator, frame_pos_string, pos_data);
             try rot_map.putNoClobber(allocator, frame_pos_string, rot_data);
+            try scale_map.putNoClobber(allocator, frame_pos_string, scale_data);
 
             const new_bone = bone_data {
                 .position = .{ .map = pos_map },
                 .rotation = .{ .map = rot_map },
+                .scale = .{ .map = scale_map },
             };
             try bones.putNoClobber(allocator, bone_name, new_bone);
         } else {
             try bones.getPtr(bone_name).?.*.position.?.map.putNoClobber(allocator, frame_pos_string, pos_data);
             try bones.getPtr(bone_name).?.*.rotation.?.map.putNoClobber(allocator, frame_pos_string, rot_data);
+            try bones.getPtr(bone_name).?.*.scale.?.map.putNoClobber(allocator, frame_pos_string, scale_data);
         }
     }
 
@@ -160,8 +209,6 @@ pub fn convert(allocator: std.mem.Allocator, text: []const u8, file_name: []cons
                 loop: []const u8,
                 animation_length: f64,
                 bones: std.json.ArrayHashMap(bone_data),
-                affected_bones: [0]u32,
-                affected_bones_is_a_whitelist: bool,
             }
         }
     };
@@ -173,29 +220,20 @@ pub fn convert(allocator: std.mem.Allocator, text: []const u8, file_name: []cons
                 .loop = "hold_on_last_frame",
                 .animation_length = @as(f64, @floatFromInt(length))/@as(f64, @floatFromInt(tempo)),
                 .bones = std.json.ArrayHashMap(bone_data){ .map = bones },
-                .affected_bones = [0]u32{},
-                .affected_bones_is_a_whitelist = false,
             }
         }
     };
 
     // generate new file name
     const file_dir_with_extension = try std.fmt.allocPrint(allocator, "output/{s}.animation.json", .{file_name[0..(file_name.len - 9)]});
-    defer allocator.free(file_dir_with_extension);
 
     // stringify json
     var stringified_text = try std.json.stringifyAlloc(allocator, new_output, .{ .whitespace = .indent_tab, .emit_nonportable_numbers_as_strings = true });
-    defer allocator.free(stringified_text);
-
     var rebuilt_text = std.ArrayList(u8).init(allocator);
-    defer rebuilt_text.deinit();
     
     // convert scientific notation float to decimal float
     var starts = std.ArrayList(usize).init(allocator);
-    defer starts.deinit();
-
     var ends = std.ArrayList(usize).init(allocator);
-    defer ends.deinit();
 
     for (stringified_text, 0..) |c, i| {
         if (c == 'e') {
