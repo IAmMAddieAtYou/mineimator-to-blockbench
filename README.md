@@ -28,6 +28,6 @@ zig build run
 ```
 
 ## Contribution & Issues:
-I am fine with some bugs and possibly some small compatability features, but if you want a pretty large or complicated compatability feature: fork this repo, add it yourself, and then make a pull request.
+I am fine with fixing some bugs and possibly some adding small compatability features, but if you want a pretty large or complicated compatability feature: fork this repo, add it yourself, and then make a pull request.
 
 [^1]: "This means the script is mostly built around the features that were required for his project to work."
