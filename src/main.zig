@@ -1,32 +1,5 @@
 const std = @import("std");
 
-pub fn scan_and_replace(allocator: std.mem.Allocator, output_text: *[]const u8) !void {
-    for (output_text.*, 0..) |c, i| {
-        if (c == 'e') {
-            _ = std.fmt.charToDigit(output_text.*[i-1], 10) catch {
-                continue;
-            };
-            _ = std.fmt.charToDigit(output_text.*[i+1], 10) catch {
-                continue;
-            };
-
-            var start: usize = i;
-            while (output_text.*[start] != '\t' and output_text.*[start] != ' ') : (start -= 1) {}
-
-            var end: usize = i;
-            while (output_text.*[end] != ',' and output_text.*[end] != '\n') : (end += 1) {}
-
-            const slice = output_text.*[start+1..end];
-            const float = try std.fmt.parseFloat(f64, slice);
-            const float_string = try std.fmt.allocPrint(allocator, "{d}", .{float});
-
-            output_text.* = try std.mem.replaceOwned(u8, allocator, output_text.*, slice, float_string);
-            try scan_and_replace(allocator, output_text);
-            break;
-        }
-    }
-}
-
 pub fn convert(allocator: std.mem.Allocator, text: []const u8, file_name: []const u8) !void {
     // data
     var tempo: u64 = 0;
@@ -211,16 +184,59 @@ pub fn convert(allocator: std.mem.Allocator, text: []const u8, file_name: []cons
     defer allocator.free(file_dir_with_extension);
 
     // stringify json
-    var output_text = try std.json.stringifyAlloc(allocator, new_output, .{ .whitespace = .indent_tab, .emit_nonportable_numbers_as_strings = true });
-    defer allocator.free(output_text);
+    var stringified_text = try std.json.stringifyAlloc(allocator, new_output, .{ .whitespace = .indent_tab, .emit_nonportable_numbers_as_strings = true });
+    defer allocator.free(stringified_text);
+
+    var rebuilt_text = std.ArrayList(u8).init(allocator);
+    defer rebuilt_text.deinit();
     
     // convert scientific notation float to decimal float
-    try scan_and_replace(allocator, &output_text);
+    var starts = std.ArrayList(usize).init(allocator);
+    defer starts.deinit();
+
+    var ends = std.ArrayList(usize).init(allocator);
+    defer ends.deinit();
+
+    for (stringified_text, 0..) |c, i| {
+        if (c == 'e') {
+            _ = std.fmt.charToDigit(stringified_text[i-1], 10) catch {
+                continue;
+            };
+            _ = std.fmt.charToDigit(stringified_text[i+1], 10) catch {
+                continue;
+            };
+
+            var start: usize = i;
+            while (stringified_text[start] != '\t' and stringified_text[start] != ' ') : (start -= 1) {}
+            try starts.append(start);
+
+            var end: usize = i;
+            while (stringified_text[end] != ',' and stringified_text[end] != '\n') : (end += 1) {}
+            try ends.append(end);
+        }
+    }
+
+    for (starts.items, ends.items, 0..) |start, end, i| {
+        const slice = stringified_text[start+1..end];
+        const float = try std.fmt.parseFloat(f64, slice);
+        const float_string = try std.fmt.allocPrint(allocator, "{d}", .{float});
+
+        if (i == 0) {
+            try rebuilt_text.appendSlice(stringified_text[0..starts.items[i]+1]);
+        } else {
+            try rebuilt_text.appendSlice(stringified_text[ends.items[i-1]..starts.items[i]+1]);
+        }
+        try rebuilt_text.appendSlice(float_string);
+
+        if (i == starts.items.len-1) {
+            try rebuilt_text.appendSlice(stringified_text[ends.items[i]..]);
+        }
+    }
 
     // write json to new file
     try std.fs.cwd().writeFile2(.{
         .sub_path = file_dir_with_extension,
-        .data = output_text,
+        .data = rebuilt_text.items,
         .flags = .{}
     });
 }
