@@ -26,6 +26,10 @@ This means the script is mostly built around the features that were required for
 ```zig
 zig build run
 ```
+```zig
+zig build
+```
+Note: add an "input" and "output" folder (exact naming) in the same directory as build.zig (if using the first command) or the resulting .exe (see the [releases](https://github.com/sarr-io/mineimator-to-blockbench/releases) for an example).
 
 ## Contribution & Issues:
 I am fine with fixing some bugs and possibly adding some small compatability features, but if you want a pretty large or complicated compatability feature: fork this repo, add it yourself, and then make a pull request.
