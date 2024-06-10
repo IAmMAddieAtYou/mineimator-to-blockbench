@@ -295,7 +295,6 @@ pub fn main() !void {
     while (try iterator.next()) |entry| {
         if (entry.kind == .file) {
             const file = try folder.readFileAlloc(allocator, entry.name, 1048576);
-            defer allocator.free(file);
 
             try convert(allocator, file, entry.name);
             _ = arena.reset(.retain_capacity);
