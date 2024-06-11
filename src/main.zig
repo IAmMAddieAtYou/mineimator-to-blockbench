@@ -272,7 +272,7 @@ pub fn convert(allocator: std.mem.Allocator, text: []const u8, file_name: []cons
     }
 
     // write json to new file
-    try std.fs.cwd().writeFile2(.{
+    try std.fs.cwd().writeFile(.{
         .sub_path = file_dir_with_extension,
         .data = rebuilt_text.items,
         .flags = .{}
