@@ -1,7 +1,7 @@
 # Mineimator to Blockbench Frame Converter
 Converts .miframes (from a Mineimator animation) to .animation.json (for Blockblench).
 
-<img src="https://github.com/sarr-io/mineimator-to-blockbench/assets/49985341/699e932c-2171-4745-b00f-fce9667b4021" width="400" height="300"/>
+<img src="https://github.com/sarr-io/mineimator-to-blockbench/assets/49985341/699e932c-2171-4745-b00f-fce9667b4021" width="400" height="295"/>
 
 ## Download
 [Go to releases](https://github.com/sarr-io/mineimator-to-blockbench/releases)
