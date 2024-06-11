@@ -126,8 +126,8 @@ pub fn convert(allocator: std.mem.Allocator, text: []const u8, file_name: []cons
 
         if (values.get("SCA_X") != null) {
             switch (values.get("SCA_X").?) {
-                .integer => |i| X_SCALE = @floatFromInt(i),
-                .float => |f| X_SCALE = f,
+                .integer => |i| X_SCA = @floatFromInt(i),
+                .float => |f| X_SCA = f,
                 else => {
                     std.debug.print("invalid SCA_X", .{});
                 },
@@ -138,8 +138,8 @@ pub fn convert(allocator: std.mem.Allocator, text: []const u8, file_name: []cons
 
         if (values.get("SCA_Y") != null) {
             switch (values.get("SCA_Y").?) {
-                .integer => |i| Y_SCALE = @floatFromInt(i),
-                .float => |f| Y_SCALE = f,
+                .integer => |i| Y_SCA = @floatFromInt(i),
+                .float => |f| Y_SCA = f,
                 else => {
                     std.debug.print("invalid SCA_Y", .{});
                 },
@@ -150,8 +150,8 @@ pub fn convert(allocator: std.mem.Allocator, text: []const u8, file_name: []cons
 
         if (values.get("SCA_Z") != null) {
             switch (values.get("SCA_Z").?) {
-                .integer => |i| Z_SCALE = @floatFromInt(i),
-                .float => |f| Z_SCALE = f,
+                .integer => |i| Z_SCA = @floatFromInt(i),
+                .float => |f| Z_SCA = f,
                 else => {
                     std.debug.print("invalid SCALE_Z", .{});
                 },
