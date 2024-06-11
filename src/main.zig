@@ -46,9 +46,9 @@ pub fn convert(allocator: std.mem.Allocator, text: []const u8, file_name: []cons
         var Y_ROT: f64 = undefined;
         var Z_ROT: f64 = undefined;
 
-        var X_SCALE: f64 = undefined;
-        var Y_SCALE: f64 = undefined;
-        var Z_SCALE: f64 = undefined;
+        var X_SCA: f64 = undefined;
+        var Y_SCA: f64 = undefined;
+        var Z_SCA: f64 = undefined;
 
         const values = keyframe.object.get("values").?.object;
 
@@ -124,32 +124,32 @@ pub fn convert(allocator: std.mem.Allocator, text: []const u8, file_name: []cons
             Z_ROT = 0;
         }
 
-        if (values.get("SCALE_X") != null) {
-            switch (values.get("SCALE_X").?) {
+        if (values.get("SCA_X") != null) {
+            switch (values.get("SCA_X").?) {
                 .integer => |i| X_SCALE = @floatFromInt(i),
                 .float => |f| X_SCALE = f,
                 else => {
-                    std.debug.print("invalid SCALE_X", .{});
+                    std.debug.print("invalid SCA_X", .{});
                 },
             }
         } else {
-            X_SCALE = 1;
+            X_SCA = 1;
         }
 
-        if (values.get("SCALE_Y") != null) {
-            switch (values.get("SCALE_Y").?) {
+        if (values.get("SCA_Y") != null) {
+            switch (values.get("SCA_Y").?) {
                 .integer => |i| Y_SCALE = @floatFromInt(i),
                 .float => |f| Y_SCALE = f,
                 else => {
-                    std.debug.print("invalid SCALE_Y", .{});
+                    std.debug.print("invalid SCA_Y", .{});
                 },
             }
         } else {
-            Y_SCALE = 1;
+            Y_SCA = 1;
         }
 
-        if (values.get("SCALE_Z") != null) {
-            switch (values.get("SCALE_Z").?) {
+        if (values.get("SCA_Z") != null) {
+            switch (values.get("SCA_Z").?) {
                 .integer => |i| Z_SCALE = @floatFromInt(i),
                 .float => |f| Z_SCALE = f,
                 else => {
@@ -157,7 +157,7 @@ pub fn convert(allocator: std.mem.Allocator, text: []const u8, file_name: []cons
                 },
             }
         } else {
-            Z_SCALE = 1;
+            Z_SCA = 1;
         }
 
         const pos_data: [3]f64 = .{
@@ -173,9 +173,9 @@ pub fn convert(allocator: std.mem.Allocator, text: []const u8, file_name: []cons
         };
 
         const scale_data: [3]f64 = .{
-            X_SCALE,
-            Y_SCALE,
-            Z_SCALE,
+            X_SCA,
+            Y_SCA,
+            Z_SCA,
         };
 
         const frame_pos_string = try std.fmt.allocPrint(allocator, "{d}", .{@as(f64, @floatFromInt(position))/@as(f64, @floatFromInt(tempo))});
