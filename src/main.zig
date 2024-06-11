@@ -174,8 +174,8 @@ pub fn convert(allocator: std.mem.Allocator, text: []const u8, file_name: []cons
 
         const scale_data: [3]f64 = .{
             X_SCA,
-            Y_SCA,
             Z_SCA,
+            Y_SCA,
         };
 
         const frame_pos_string = try std.fmt.allocPrint(allocator, "{d}", .{@as(f64, @floatFromInt(position))/@as(f64, @floatFromInt(tempo))});
