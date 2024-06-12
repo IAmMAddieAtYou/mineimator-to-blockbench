@@ -153,7 +153,7 @@ pub fn convert(allocator: std.mem.Allocator, text: []const u8, file_name: []cons
                 .integer => |i| Z_SCA = @floatFromInt(i),
                 .float => |f| Z_SCA = f,
                 else => {
-                    std.debug.print("invalid SCALE_Z", .{});
+                    std.debug.print("invalid SCA_Z", .{});
                 },
             }
         } else {
