@@ -228,7 +228,7 @@ pub fn convert(allocator: std.mem.Allocator, text: []const u8, file_name: []cons
     const file_dir_with_extension = try std.fmt.allocPrint(allocator, "output/{s}.animation.json", .{file_name[0..(file_name.len - 9)]});
 
     // stringify json
-    var stringified_text = try std.json.stringifyAlloc(allocator, new_output, .{ .whitespace = .indent_tab, .emit_nonportable_numbers_as_strings = true });
+    var stringified_text = try std.json.stringifyAlloc(allocator, new_output, .{ .whitespace = .indent_tab });
     var rebuilt_text = std.ArrayList(u8).init(allocator);
     
     // convert scientific notation float to decimal float
