@@ -167,8 +167,8 @@ pub fn convert(allocator: std.mem.Allocator, text: []const u8, file_name: []cons
         };
 
         const rot_data: [3]f64 = .{
-            X_ROT,
             -Z_ROT,
+            -X_ROT,
             -Y_ROT,
         };
 
